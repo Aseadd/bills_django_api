@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Bill, Payment, Report, Reminder, Customer
+from .models import User, Bill, Payment, Report, Reminder, Customer, Product
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,3 +39,8 @@ class CustomerSerializer(serializers.ModelSerializer):
         model = Customer
         fields = ['id', 'name', 'email', 'password']
         read_only_fields = ['id']
+
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'

@@ -3,17 +3,18 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .models import User, Bill, Payment, Report, Reminder, Customer
+from .models import User, Bill, Payment, Report, Reminder, Customer, Product
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken, TokenError
 from rest_framework import status
-from .serializers import BillSerializer, CustomerSerializer
+from .serializers import BillSerializer, CustomerSerializer, ProductSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 import stripe
 import json
 from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.models import Group, Permission
 
-stripe.api_key = "sk_test_51J"
+stripe.api_key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
 
 class UserView(APIView):
     def get(self, request):
@@ -76,9 +77,10 @@ class LogoutView(APIView):
 class BillsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        bills = Bill.objects.all()
-        serializer = BillSerializer(bills, many=True)
-        return Response(serializer.data)
+        if request.user.groups.filter(name='Admin').exists():
+            bills = Bill.objects.all()
+            serializer = BillSerializer(bills, many=True)
+            return Response(serializer.data)
     
     def post(self, request):
         # if not request.user.is_authenticated:
@@ -208,3 +210,40 @@ def webhook(request):
     # Other event types can be handled similarly
 
     return HttpResponse(status=200)
+
+admin_group, created = Group.objects.get_or_create(name='Admin')
+if created:
+    admin_group.permissions.add(Permission.objects.get(codename='admin_permissions'))
+
+# Create Biller group
+biller_group, created = Group.objects.get_or_create(name='Biller')
+if created:
+    biller_group.permissions.add(Permission.objects.get(codename='biller_permissions'))
+
+# Create Customer group
+customer_group, created = Group.objects.get_or_create(name='Customer')
+if created:
+    customer_group.permissions.add(Permission.objects.get(codename='customer_permissions'))
+
+
+# admin_user = User.objects.get(email="betsega23@gmail.com")
+# admin_user.groups.add(admin_group)
+
+# biller_user = User.objects.get(email="aa@gmail.com")
+# biller_user.groups.add(biller_group)
+
+customer_user = User.objects.get(email="at@gmail.com")
+customer_user.groups.add(customer_group)
+
+class ProductListView(APIView):
+    def get(self, request):
+        products = Product.objects.all()
+        serializer = ProductSerializer(products, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ProductSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response("Product Created Successfully")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

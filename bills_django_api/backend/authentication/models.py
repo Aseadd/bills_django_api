@@ -1,10 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
 
 # Create your models here.
 from django.contrib.auth.models import BaseUserManager
 
 class UserManager(BaseUserManager):
+    groups = models.ManyToManyField(Group, blank=True)
     def _create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set.")
@@ -62,7 +65,7 @@ class Payment(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20)
     transaction_id = models.CharField(max_length=50) 
-    
+
 class Reminder(models.Model):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -89,3 +92,22 @@ class Customer(models.Model):
     password = models.CharField(max_length=250)
     def __str__(self):
         return self.name 
+
+# Create a new group
+class CustomPermissions(models.Model):
+    class Meta:
+        permissions = [
+            ("admin_permissions", "Can manage users, system configurations, and overall system settings"),
+            ("biller_permissions", "Can create bills, monitor payments, and manage biller-specific settings"),
+            ("customer_permissions", "Can view and pay bills, receive reminders, and access payment history"),
+        ]
+
+class Product(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return self.name
+
+
