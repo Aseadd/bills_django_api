@@ -8,6 +8,12 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken, TokenErro
 from rest_framework import status
 from .serializers import BillSerializer, CustomerSerializer
 from rest_framework.permissions import IsAuthenticated
+from django.views.decorators.csrf import csrf_exempt
+import stripe
+import json
+from django.http import JsonResponse, HttpResponse
+
+stripe.api_key = "sk_test_51J"
 
 class UserView(APIView):
     def get(self, request):
@@ -145,3 +151,60 @@ class CustomerView(APIView):
         customer = Customer.objects.get(id=pk)
         customer.delete()
         return Response("Customer Deleted Successfully")
+
+@csrf_exempt
+def create_payment(request):
+    if request.method == 'POST':
+        amount = request.POST.get('amount', None)
+        if amount is None:
+            amount = 2000
+        if amount is not None:
+            try:
+                # Convert amount to float before multiplying
+                amount_float = float(amount)
+
+                # Use int(amount_float) to convert the float to an integer
+                payment_intent = stripe.PaymentIntent.create(
+                    amount=int(amount_float * 100),
+                    currency='usd',
+                )
+
+                Payment.objects.create(
+                    amount=amount_float,
+                    status=request.POST.get('status', ''),  # Assuming 'status' is also part of the request
+                    transaction_id=request.POST.get('transaction_id', ''),
+                )
+
+                return JsonResponse({'clientSecret': payment_intent.client_secret})
+            except Exception as e:
+                return JsonResponse({'error': str(e)})
+        else:
+            return JsonResponse({'error': 'Amount not provided'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+
+@csrf_exempt
+def webhook(request):
+    payload = request.body
+    sig_header = request.headers['Stripe-Signature']
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, 'your_endpoint_secret'
+        )
+    except ValueError as e:
+        # Invalid payload
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature
+        return HttpResponse(status=400)
+
+    # Handle the event
+    if event['type'] == 'payment_intent.succeeded':
+        payment_intent = event['data']['object']  # contains a stripe.PaymentIntent
+        # Update payment status in your database
+
+    # Other event types can be handled similarly
+
+    return HttpResponse(status=200)

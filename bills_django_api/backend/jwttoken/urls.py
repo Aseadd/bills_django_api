@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt import views as jwt_views
 from authentication.views import Loginview, RegisterView, LogoutView, BillsView, BillCreateView, BillDetailView, CustomerView, CustomerView, UserView
+from authentication.views import create_payment, webhook
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -31,4 +32,6 @@ urlpatterns = [
     path('login/', Loginview.as_view(), name="login"),
     path('users/', UserView.as_view(), name="users"),
     path('users/<int:id>', UserView.as_view(), name="users"),
+    path('api/create-payment/', create_payment, name='create-payment'),
+    path('webhook/', webhook, name='webhook'),
 ]

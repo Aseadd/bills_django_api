@@ -59,12 +59,10 @@ class Bill(models.Model):
         return f"{self.bill_name} - {self.biller_name} - {self.bill_amount} - {self.bill_date} - {self.status}"
 
 class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
-    payment_amount = models.IntegerField()
-    payment_date = models.DateField()
-    def __str__(self):
-        return str(self.payment_amount) + " - " + str(self.payment_date)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20)
+    transaction_id = models.CharField(max_length=50) 
+    
 class Reminder(models.Model):
     bill = models.ForeignKey(Bill, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
