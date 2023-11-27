@@ -4,7 +4,7 @@ from .models import User, Bill, Payment, Report, Reminder, Customer, Product
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'password']
+        fields = ['id', 'name', 'email', 'password', 'user_type']
         
     def create(self, validated_data):
         password = validated_data.pop("password")

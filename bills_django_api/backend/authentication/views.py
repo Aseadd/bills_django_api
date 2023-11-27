@@ -77,10 +77,9 @@ class LogoutView(APIView):
 class BillsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        if request.user.groups.filter(name='Admin').exists():
-            bills = Bill.objects.all()
-            serializer = BillSerializer(bills, many=True)
-            return Response(serializer.data)
+        bills = Bill.objects.all()
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
     
     def post(self, request):
         # if not request.user.is_authenticated:
