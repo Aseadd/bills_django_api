@@ -89,8 +89,11 @@ class BillsView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response("Bill Created Successfully")
-    def delete(self, request, pk):
-        bill = Bill.objects.get(id=pk)
+    def delete(self, request, id):
+        if not request.user.is_authenticated:
+            return Response({"error": "User is not authenticated."}, status=401)
+            
+        bill = Bill.objects.get(id=id)
         bill.delete()
         return Response("Bill Deleted Successfully")
 
