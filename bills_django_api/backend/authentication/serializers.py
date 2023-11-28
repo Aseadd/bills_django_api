@@ -18,17 +18,8 @@ class UserSerializer(serializers.ModelSerializer):
         instance = self.Meta.model(**validated_data)
         instance.save()
         return instance
-# class BillSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Bill
-#         fields = ['id', 'bill_name', 'bill_amount', 'bill_date', 'status', 'biller_name']
-#     def create(self, validated_data):
-#         user = self.context["request"].user
-#         bill = Bill.objects.create(user=user, **validated_data)
-#         return bill
         
 class BillSerializer(serializers.ModelSerializer):
-    # user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta:
         model = Bill
         fields = ['id', 'bill_name', 'bill_amount', 'bill_date', 'status', 'biller_name']

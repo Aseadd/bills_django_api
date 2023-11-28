@@ -64,7 +64,6 @@ class Bill(models.Model):
         ('overdue', 'Overdue'),
     ]
     id = models.AutoField(primary_key=True)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     bill_name = models.CharField(max_length=250)
     bill_amount = models.IntegerField()
     bill_date = models.DateField()
