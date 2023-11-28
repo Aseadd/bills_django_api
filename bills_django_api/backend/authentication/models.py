@@ -3,46 +3,59 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 
-# Create your models here.
-from django.contrib.auth.models import BaseUserManager
-
 class UserManager(BaseUserManager):
     groups = models.ManyToManyField(Group, blank=True)
-    def _create_user(self, email, password=None, **extra_fields):
+
+    def _create_user(self, email, password=None, user_type=None, **extra_fields):
         if not email:
             raise ValueError("The Email field must be set.")
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
+        user = self.model(email=email, user_type=user_type, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, password=None, user_type=None, **extra_fields):
         extra_fields.setdefault("is_staff", False)
         extra_fields.setdefault("is_superuser", False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, password, user_type, **extra_fields)
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, password=None, user_type=None, **extra_fields):
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         if extra_fields.get("is_staff") is not True:
             raise ValueError("Superuser must have is_staff=True.")
         if extra_fields.get("is_superuser") is not True:
             raise ValueError("Superuser must have is_superuser=True.")
-        return self._create_user(email, password, **extra_fields)
-
-
+        return self._create_user(email, password, user_type, **extra_fields)
 
 class User(AbstractUser):
+    USER_TYPE_CHOICES = (
+        ('B', 'Biller'),
+        ('A', 'Admin'),
+        ('C', 'Customer'),
+    )
+
     name = models.CharField(max_length=250)
     email = models.CharField(max_length=250, unique=True)
     password = models.CharField(max_length=250)
+    user_type = models.CharField(max_length=1, choices=USER_TYPE_CHOICES, default='C')
 
     username = None
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['name', 'user_type']
+
 
     objects = UserManager()
+
+class Biller(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+class Admin(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+class Customer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
 class Bill(models.Model):
     STATUS_CHOICES = [
@@ -51,7 +64,6 @@ class Bill(models.Model):
         ('overdue', 'Overdue'),
     ]
     id = models.AutoField(primary_key=True)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE)
     bill_name = models.CharField(max_length=250)
     bill_amount = models.IntegerField()
     bill_date = models.DateField()

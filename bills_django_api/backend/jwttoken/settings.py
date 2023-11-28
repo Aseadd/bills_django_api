@@ -57,6 +57,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), 
+}
+
 STRIPE_PUBLIC_KEY = 'pk_test_51OGhZZEh795fWmL2VhTwY1P5zpNcxF7S87ebi6FJpI0ORKVLBj0aS4TO6vgezU2d67vszAHNf20ZokW8jb07IqlE00n6A3MWdw'
 STRIPE_SECRET_KEY = 'sk_test_51OGhZZEh795fWmL2PX4jIVgFvg1n6oEm9wY0lsPeAkpk8MaPoPJi84M6m6krrCuKWlrXlCuedR7T8pvqU0ggrmcg00Z2K4D33O'
 

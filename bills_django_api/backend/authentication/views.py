@@ -27,8 +27,8 @@ class UserView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    def delete(self, request, pk):
-        user = User.objects.get(id=pk)
+    def delete(self, request, id):
+        user = User.objects.get(id=id)
         user.delete()
         return Response("User Deleted Successfully")
 
@@ -38,6 +38,8 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    
 
 class Loginview(APIView):
     def post(self, request):
@@ -77,10 +79,9 @@ class LogoutView(APIView):
 class BillsView(APIView):
     permission_classes = [IsAuthenticated]
     def get(self, request):
-        if request.user.groups.filter(name='Admin').exists():
-            bills = Bill.objects.all()
-            serializer = BillSerializer(bills, many=True)
-            return Response(serializer.data)
+        bills = Bill.objects.all()
+        serializer = BillSerializer(bills, many=True)
+        return Response(serializer.data)
     
     def post(self, request):
         # if not request.user.is_authenticated:
@@ -89,10 +90,7 @@ class BillsView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response("Bill Created Successfully")
-    def delete(self, request, id):
-        if not request.user.is_authenticated:
-            return Response({"error": "User is not authenticated."}, status=401)
-            
+    def delete(self, request, id):    
         bill = Bill.objects.get(id=id)
         bill.delete()
         return Response("Bill Deleted Successfully")
@@ -117,23 +115,6 @@ class BillDetailView(APIView):
         except Bill.DoesNotExist:
             return Response({'error': 'Bill not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    def delete(self, request, id):
-        try:
-            bill = Bill.objects.get(id=id)
-            bill.delete()
-            return Response("Bill Deleted Successfully")
-        except Bill.DoesNotExist:
-            return Response({'error': 'Bill not found'}, status=status.HTTP_404_NOT_FOUND)
-
- # Create Bills view in urls.py
-# Path: bills/urls.py
-# class BillCreateView(APIView):
-#     def post(self, request):
-#         serializer = BillSerializer(data=request.data)
-#         serializer.is_valid(raise_exception=True)
-#         serializer.save(user=request.user)
-#         return Response(serializer.data)
-
 class BillCreateView(APIView):
     def post(self, request):
         serializer = BillSerializer(data=request.data, context={'request': request})
@@ -199,19 +180,11 @@ def webhook(request):
             payload, sig_header, 'your_endpoint_secret'
         )
     except ValueError as e:
-        # Invalid payload
         return HttpResponse(status=400)
     except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
         return HttpResponse(status=400)
-
-    # Handle the event
     if event['type'] == 'payment_intent.succeeded':
-        payment_intent = event['data']['object']  # contains a stripe.PaymentIntent
-        # Update payment status in your database
-
-    # Other event types can be handled similarly
-
+        payment_intent = event['data']['object']  
     return HttpResponse(status=200)
 
 admin_group, created = Group.objects.get_or_create(name='Admin')
@@ -227,13 +200,6 @@ if created:
 customer_group, created = Group.objects.get_or_create(name='Customer')
 if created:
     customer_group.permissions.add(Permission.objects.get(codename='customer_permissions'))
-
-
-# admin_user = User.objects.get(email="betsega23@gmail.com")
-# admin_user.groups.add(admin_group)
-
-# biller_user = User.objects.get(email="aa@gmail.com")
-# biller_user.groups.add(biller_group)
 
 customer_user = User.objects.get(email="at@gmail.com")
 customer_user.groups.add(customer_group)
