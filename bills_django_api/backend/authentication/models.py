@@ -50,15 +50,12 @@ class User(AbstractUser):
 
 class Biller(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Add additional fields for the Biller model
 
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Add additional fields for the Admin model
 
 class Customer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Add additional fields for the Customer model
 
 class Bill(models.Model):
     STATUS_CHOICES = [

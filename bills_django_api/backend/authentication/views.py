@@ -27,8 +27,8 @@ class UserView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
-    def delete(self, request, pk):
-        user = User.objects.get(id=pk)
+    def delete(self, request, id):
+        user = User.objects.get(id=id)
         user.delete()
         return Response("User Deleted Successfully")
 
@@ -38,6 +38,8 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data)
+
+    
 
 class Loginview(APIView):
     def post(self, request):
@@ -88,10 +90,7 @@ class BillsView(APIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response("Bill Created Successfully")
-    def delete(self, request, id):
-        if not request.user.is_authenticated:
-            return Response({"error": "User is not authenticated."}, status=401)
-            
+    def delete(self, request, id):    
         bill = Bill.objects.get(id=id)
         bill.delete()
         return Response("Bill Deleted Successfully")
@@ -116,13 +115,13 @@ class BillDetailView(APIView):
         except Bill.DoesNotExist:
             return Response({'error': 'Bill not found'}, status=status.HTTP_404_NOT_FOUND)
     
-    def delete(self, request, id):
-        try:
-            bill = Bill.objects.get(id=id)
-            bill.delete()
-            return Response("Bill Deleted Successfully")
-        except Bill.DoesNotExist:
-            return Response({'error': 'Bill not found'}, status=status.HTTP_404_NOT_FOUND)
+    # def delete(self, request, id):
+    #     try:
+    #         bill = Bill.objects.get(id=id)
+    #         bill.delete()
+    #         return Response("Bill Deleted Successfully")
+    #     except Bill.DoesNotExist:
+    #         return Response({'error': 'Bill not found'}, status=status.HTTP_404_NOT_FOUND)
 
  # Create Bills view in urls.py
 # Path: bills/urls.py
