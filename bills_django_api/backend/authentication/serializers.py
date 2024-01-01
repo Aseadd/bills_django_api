@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Bill, Payment, Report, Reminder, Customer, Product
+from .models import User, Bill, Payment, Report, Reminder, Customer, Product, SwiftConnection
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -35,3 +35,8 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = '__all__'
+class SwiftConnectionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SwiftConnection
+        fields = '__all__'
+        read_only_fields = ['id']

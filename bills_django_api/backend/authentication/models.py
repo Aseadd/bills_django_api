@@ -122,4 +122,20 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+class SwiftConnection(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    id = models.AutoField(primary_key=True)
+    companyName = models.CharField(max_length=255)
+    companyAddress: models.CharField(max_length=255)
+    contactPhone = models.CharField(max_length=255)
+    contactEmail = models.CharField(max_length=255)
+    status: models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return self.companyName
+
 

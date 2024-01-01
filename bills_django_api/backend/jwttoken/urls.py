@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt import views as jwt_views
-from authentication.views import Loginview, RegisterView, LogoutView, BillsView, BillCreateView, BillDetailView, CustomerView, CustomerView, UserView, ProductListView
+from authentication.views import Loginview, RegisterView, LogoutView, BillsView, BillCreateView, BillDetailView, CustomerView, CustomerView, UserView, ProductListView, SwiftConnectionView
 from authentication.views import create_payment, webhook
 
 urlpatterns = [
@@ -36,4 +36,5 @@ urlpatterns = [
     path('api/create-payment/', create_payment, name='create-payment'),
     path('webhook/', webhook, name='webhook'),
     path('products/', ProductListView.as_view(), name='product-list'),
+    path('swift/', SwiftConnectionView.as_view(), name='swift-connection'),
 ]

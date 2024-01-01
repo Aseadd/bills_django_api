@@ -3,10 +3,10 @@ from rest_framework.views import APIView
 from .serializers import UserSerializer
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .models import User, Bill, Payment, Report, Reminder, Customer, Product
+from .models import User, Bill, Payment, Report, Reminder, Customer, Product, SwiftConnection
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken, TokenError
 from rest_framework import status
-from .serializers import BillSerializer, CustomerSerializer, ProductSerializer
+from .serializers import BillSerializer, CustomerSerializer, ProductSerializer, SwiftConnectionSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.views.decorators.csrf import csrf_exempt
 import stripe
@@ -215,4 +215,18 @@ class ProductListView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response("Product Created Successfully")
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class SwiftConnectionView(APIView):
+    def get(self, request):
+        connections = SwiftConnection.objects.all()
+        serializer = SwiftConnectionSerializer(connections, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = SwiftConnectionSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response("Connection Created Successfully")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
